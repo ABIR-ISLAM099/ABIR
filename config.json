@@ -1,8 +1,8 @@
 {
-    "admin":"Dip To",
+    "admin":"IMRAN",
     "prefix": "!",
-    "adminID": [],
-    "Token": "EAAUjIyfhesUBO6YU84ZBO1rZCpLo8WGaHs4TAZAZCZA6WJtAAaYYidf89LBSZBlw3jtCgUJOygrac2E8ZAvMkdbYEloctc3zaZBJHXSyo5JN5Q6r4NJpDmLUzISXTdTZCuNWCyyr4dQtBCkE2IxdVFYJ2rl5LFw1QRMIe42lUCDZCVCD6GV4oJZAjDumCYi9tpWwMvzJPZAGT2UlBhoZBJDg0IwZDZD",
-    "VERIFY_TOKEN": "dipto0089",
+    "adminID": ["100075122837809"],
+    "Token": "",
+    "VERIFY_TOKEN": "abir099",
     "version": "6.9"
 }
