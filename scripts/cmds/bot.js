@@ -12,7 +12,7 @@ module.exports.config = {
     coolDowns: 5,
 };
 
-module.exports.onStart = async ({ event, args, message }) => {
+module.exports.handleMessage = async ({ event, args, message }) => {
     const msg = args.join(" ");
 
     if (!msg) {
@@ -27,16 +27,5 @@ module.exports.onStart = async ({ event, args, message }) => {
         await message.reply(data);
     } catch (error) {
         message.reply(`Error: ${error.message}`);
-    }
-};
-
-// New handleMessage function
-module.exports.handleMessage = async ({ event, message }) => {
-    const { body } = event;
-
-    // Example condition to respond to a specific message
-    if (body.toLowerCase() === "bot") {
-        const reply = "Hello! What do you want to talk about?";
-        await message.reply(reply);
     }
 };
