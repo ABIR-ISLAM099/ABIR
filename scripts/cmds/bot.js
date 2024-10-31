@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 module.exports.config = {
-    name: "bot",
+    name: "baby",
     aliases: ["bby"],
     version: "1.0",
     credits: "Dipto",
@@ -30,12 +30,12 @@ module.exports.onStart = async ({ event, args, message }) => {
     }
 };
 
-// New handleEvent function
-module.exports.handleEvent = async ({ event, message }) => {
-    const { body, senderID } = event;
+// New handleMessage function
+module.exports.handleMessage = async ({ event, message }) => {
+    const { body } = event;
 
     // Example condition to respond to a specific message
-    if (body.toLowerCase() === "bot") {
+    if (body.toLowerCase() === "hello baby") {
         const reply = "Hello! What do you want to talk about?";
         await message.reply(reply);
     }
