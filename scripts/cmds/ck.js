@@ -23,6 +23,8 @@ module.exports.onChat = async function ({ event, args, message }) {
     const apiUrl = `https://www.noobs-api.000.pe/dipto/baby?text=${encodeURIComponent(msg)}`;
         const response = await axios.get(apiUrl);
         const data = response.data.reply;
+
+        await message.reply(data);
    }
     } catch (error) {
         message.reply(error.message)
