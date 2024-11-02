@@ -51,7 +51,30 @@ async function handleMessage(sender_psid, received_message) {
     }
     return;
   }
+  const text = received_message.text;
 
+  // [ onChat ] //
+  for (const command of global.functions.commands.values()) {
+    if (received_message.is_echo) return;
+    if (command.onChat) {
+      try {
+        await command.onChat({
+          event: received_message,
+          message: {
+            senderID: sender_psid,
+            text,
+            reply: (textOrMessage) => reply(sender_psid, textOrMessage),
+            unsend: (message_id) => unsend(message_id),
+            edit: (message_id, new_text) => edit(message_id, new_text),
+            react: (emoji) => react(sender_psid, emoji),
+            button: (text, buttons) => buttonMessage(sender_psid, text, buttons),
+          },
+        });
+      } catch (error) {
+        console.error(`Error in onChat for command ${command.config.name}:`, error);
+      }
+    }
+  }
   if (received_message.text && received_message.text.startsWith(prefix)) {
     const args = received_message.text.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
@@ -61,6 +84,18 @@ async function handleMessage(sender_psid, received_message) {
       global.functions.commands.get(global.functions.aliases.get(commandName));
 
     if (command) {
+ const body = received_message.text;
+const { usePrefix = true ,role = 0 } = command.config;
+    if (role === 1 && !hasPermission(sender_psid)) {
+        await reply(sender_psid, "You don’t have permission to use this command.");
+        return;
+    }
+      if (!usePrefix && body.startsWith(prefix)) {
+          return await reply(sender_psid,`The command "${commandName}" does not require a prefix.`);
+      }
+      if (usePrefix && !body.startsWith(prefix)) {
+						return; 
+      }
       try {
         await command.onStart({
           event: received_message,
@@ -84,4 +119,8 @@ async function handleMessage(sender_psid, received_message) {
   }
 }
 
+function hasPermission(uid) {
+ const admins = global.functions.config.adminBot || []
+  return admins.includes(uid);
+}
 module.exports = { handleMessage };
