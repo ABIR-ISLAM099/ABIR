@@ -14,8 +14,8 @@ module.exports = {
       en: "{pn} <code to test>",
     },
   },
-  onStart: async ({ api, event, args }) => {
-    const senderId = event.sender.id;
+  onStart: async ({ event,fullevent, args , message }) => {
+   // const senderId = event.sender.id;
 
     function out(result) {
       if (typeof result === "number" || typeof result === "boolean" || typeof result === "function") {
@@ -30,7 +30,7 @@ module.exports = {
         result = "undefined";
       }
 
-      api.sendMessage(senderId, { text: result });
+      message.reply(result);
     }
 
     function mapToObj(map) {
@@ -47,7 +47,7 @@ module.exports = {
           ${args.join(" ")}
         } catch (err) {
           console.error("Eval command error:", err);
-          api.sendMessage(senderId, { text: \`Error:\\n\${err.stack || err.message}\` });
+          message.reply(\`Error:\\n\${err.stack || err.message}\`);
         }
       })();
     `;
@@ -55,7 +55,7 @@ module.exports = {
     try {
       eval(code);
     } catch (err) {
-      await api.sendMessage(senderId, { text: `Error: ${err.message}` });
+      await message.reply(`Error: ${err.message}`);
     }
   },
 };
