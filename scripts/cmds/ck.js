@@ -11,12 +11,18 @@ module.exports.config = {
 };
 
 module.exports.onChat = async function ({ event, args, message }) {
+
+    const msg = args.join(" ");
+
+    if (!msg) {
+        return message.reply("Please provide a message.");
+        
     try {
         const messageContent = event.text;
         if(messageContent.startsWith("ck")){
-    const responseMessage = ["Hey baby","yes baby","😘😘 yes","ya baby i am listening","😘😘Hey"];
-    const randomIndex = responseMessage[Math.floor(Math.random() * responseMessage.length)];
-    await message.reply(randomIndex);
+    const apiUrl = `https://www.noobs-api.000.pe/dipto/baby?text=${encodeURIComponent(msg)}`;
+        const response = await axios.get(apiUrl);
+        const data = response.data.reply;
    }
     } catch (error) {
         message.reply(error.message)
