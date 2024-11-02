@@ -26,7 +26,7 @@ module.exports.onChat = async function ({ event, args, message }) {
             const response = await axios.get(apiUrl);
             const data = response.data.reply;
 
-            await message.reply(data);
+        
         } else {
             await message.reply(msg); // Echo back the message if it doesn't start with "ck"
         }
