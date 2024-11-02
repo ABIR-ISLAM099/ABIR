@@ -6,13 +6,14 @@ module.exports.config = {
     version: "1.0",
     credits: "Dipto",
     role: 3,
+    usePrefix: false,
     description: "Chat with baby",
     commandCategory: "fun",
     guide: "{prefix}baby <message>",
     coolDowns: 5,
 };
 
-module.exports.handleMessage = async ({ event, args, message }) => {
+module.exports.onStart = async ({ event, args, message }) => {
     const msg = args.join(" ");
 
     if (!msg) {
