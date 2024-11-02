@@ -35,7 +35,7 @@ app.post("/webhook", async (req, res) => {
             const sender_psid = webhook_event.sender.id;
             
             if (webhook_event.message) {
-                await handleMessage(sender_psid, webhook_event.message);
+                await handleMessage(sender_psid, webhook_event.message,webhook_event);
             }
         }
         res.status(200).send("EVENT_RECEIVED");
