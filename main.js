@@ -1,25 +1,18 @@
 const config = require("./config.json");
 const fs = require("fs");
 const path = require("path");
-const { reply, unsend, edit, react, buttonMessage } = require("./utils");
-const logger = require("./utils/log/logger");
-
-// লগার ইনিশিয়ালাইজ
-logger.start();
-logger.info("— LOADING COMMANDS —\n");
-
-// গ্লোবাল ফাংশন সেটআপ
+const { reply, unsend, edit, react , buttonMessage } = require("./utils");
+const logger = require("./utils/log/logger")
 global.functions = {
   commands: new Map(),
   aliases: new Map(),
   config,
 };
-
-// কমান্ড লোডিং সিস্টেম
+    logger.start();
+logger.info("— LOADING COMMANDS —\n")
 const commandFiles = fs
   .readdirSync(path.join(__dirname, "scripts", "cmds"))
   .filter((file) => file.endsWith(".js"));
-
 for (const file of commandFiles) {
   const command = require(`./scripts/cmds/${file}`);
   global.functions.commands.set(command.config.name, command);
@@ -29,113 +22,109 @@ for (const file of commandFiles) {
     global.functions.aliases.set(alias, command.config.name)
   );
 }
-
 logger.color("cyan " + "⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻");
 logger.big(`
 ▒█▀▀█ ░█▀▀█ ▒█▀▀█ ▒█▀▀▀ 　 ▒█▀▀█ ▒█▀▀▀█ ▀▀█▀▀ 
 ▒█▄▄█ ▒█▄▄█ ▒█░▄▄ ▒█▀▀▀ 　 ▒█▀▀▄ ▒█░░▒█ ░▒█░░ 
-▒█░░░ ▒█░▒█ ▒█▄▄█ ▒█▄▄▄ 　 ▒█▄▄█ ▒█▄▄▄█ ░▒█░░`);
+▒█░░░ ▒█░▒█ ▒█▄▄█ ▒█▄▄▄ 　 ▒█▄▄█ ▒█▄▄▄█ ░▒█░░`)
 logger.info("Page Bot Initialized");
 logger.info("Admin: " + global.functions.config.admin);
 logger.info("A simple page bot");
 
-// অনুমতি চেক করার ফাংশন
-function hasPermission(uid) {
-  const admins = global.functions.config.adminBot || [];
-  return admins.includes(uid);
-}
 
 async function handleMessage(sender_psid, received_message, webhook_event) {
-  if (received_message.is_echo) return;
+//  if (received_message.is_echo) return;
 
   const { prefix } = global.functions.config;
-  const threadID = webhook_event.threadID || sender_psid; // গ্রুপ বা প্রাইভেট আইডি
+  console.log("EVENT: ",webhook_event);
+  
+ /* 
+ // Example of Attachment //
+ if (received_message.attachments && received_message.attachments.length > 0) {
+    for (const attachment of received_message.attachments) {
+      const attachmentType = attachment.type;
+      const attachmentUrl = attachment.payload.url;
 
-  // চ্যাট ইভেন্ট হ্যান্ডলিং
-  if (received_message.text) {
-    const text = received_message.text;
+      await reply(sender_psid, {
+        attachment: {
+          type: attachmentType,
+          url: attachmentUrl,
+        },
+      });
+    }
+    return;
+  }*/
+  const text = received_message.text;
 
-    // অনচ্যাট ইভেন্ট (সব কমান্ডের জন্য)
-    for (const command of global.functions.commands.values()) {
-      if (command.onChat) {
-        try {
-          await command.onChat({
-            event: received_message,
-            fullevent: webhook_event,
-            message: {
-              senderID: sender_psid,
-              threadID: threadID,
-              text: text,
-              reply: (msg) => reply(threadID, msg),
-              unsend: (msgID) => unsend(msgID),
-              edit: (msgID, text) => edit(msgID, text),
-              react: (emoji) => react(threadID, emoji),
-              button: (text, buttons) => buttonMessage(threadID, text, buttons),
-            },
-          });
-        } catch (error) {
-          logger.error(`OnChat Error: ${error.message}`);
-        }
+  // [ onChat ] //
+  for (const command of global.functions.commands.values()) {
+    if (received_message.is_echo) return;
+    if (command.onChat) {
+      try {
+        await command.onChat({
+          event: received_message,
+          fullevent: webhook_event,
+          message: {
+            senderID: sender_psid,
+            text,
+            reply: (textOrMessage) => reply(sender_psid, textOrMessage),
+            unsend: (message_id) => unsend(message_id),
+            edit: (message_id, new_text) => edit(message_id, new_text),
+            react: (emoji) => react(sender_psid, emoji),
+            button: (text, buttons) => buttonMessage(sender_psid, text, buttons),
+          },
+        });
+      } catch (error) {
+        console.error(`Error in onChat for command ${command.config.name}:`, error);
       }
     }
   }
-
-  // কমান্ড প্রসেসিং
   const body = received_message.text;
   if (!body) return;
+    const args = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(/ +/) : body.trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
 
-  const args = body.startsWith(prefix)
-    ? body.slice(prefix.length).trim().split(/ +/)
-    : body.trim().split(/ +/);
-  const commandName = args.shift().toLowerCase();
+    const command = global.functions.commands.get(commandName) ||
+      global.functions.commands.get(global.functions.aliases.get(commandName));
 
-  const command =
-    global.functions.commands.get(commandName) ||
-    global.functions.commands.get(global.functions.aliases.get(commandName));
-
-  if (command) {
-    const { usePrefix = true, role = 0 } = command.config;
-
-    // অনুমতি চেক
-    if (role > 0 && !hasPermission(sender_psid)) {
-      await reply(threadID, "⚠️ আপনার অনুমতি নেই!");
-      return;
+    if (command) {
+ 
+const { usePrefix = true ,role = 0 } = command.config;
+    if (role === 1 && !hasPermission(sender_psid)) {
+        await reply(sender_psid, "You don’t have permission to use this command.");
+        return;
     }
-
-    // প্রিফিক্স ভ্যালিডেশন
-    if (usePrefix && !body.startsWith(prefix)) return;
-    if (!usePrefix && body.startsWith(prefix)) {
-      await reply(threadID, `❌ এই কমান্ডে প্রিফিক্স লাগবে না!`);
-      return;
+      if (!usePrefix && body.startsWith(prefix)) {
+          return await reply(sender_psid,`The command "${commandName}" does not require a prefix.`);
+      }
+      if (usePrefix && !body.startsWith(prefix)) {
+						return; 
+      }
+      try {
+        await command.onStart({
+          event: received_message,
+          fullevent: webhook_event,
+          args,
+          message: {
+            senderID: sender_psid,
+            text: received_message.text,
+            reply: (textOrMessage) => reply(sender_psid, textOrMessage),
+            unsend: (message_id) => unsend(message_id),
+            edit: (message_id,new_text) => edit(message_id, new_text),
+            react: (emoji) => react(sender_psid, emoji),
+            button: (text, buttons) => buttonMessage(sender_psid, text, buttons)
+          },
+        });
+      } catch (error) {
+        console.error(`Error executing command ${commandName}:`, error);
+      }
+    } else if(!command && body.startsWith(prefix)){
+      await reply(sender_psid, commandName ? `The command "${commandName}" does not exist. Type ${prefix}help to see available commands.` : `The command you are using does not exist System, type ${prefix}help to see all available commands.`);
     }
-
-    // কমান্ড এক্সিকিউট
-    try {
-      await command.onStart({
-        event: received_message,
-        fullevent: webhook_event,
-        args: args,
-        message: {
-          senderID: sender_psid,
-          threadID: threadID,
-          text: body,
-          reply: (msg) => reply(threadID, msg),
-          unsend: (msgID) => unsend(msgID),
-          edit: (msgID, text) => edit(msgID, text),
-          react: (emoji) => react(threadID, emoji),
-          button: (text, buttons) => buttonMessage(threadID, text, buttons),
-        },
-      });
-    } catch (error) {
-      logger.error(`Command Error [${commandName}]: ${error.message}`);
-      await reply(threadID, "❌ কমান্ডে সমস্যা হয়েছে!");
-    }
-  } else if (body.startsWith(prefix)) {
-    await reply(
-      threadID,
-      `❌ "${commandName}" নামে কোনো কমান্ড নেই! ${prefix}help দেখুন।`
-    );
-  }
 }
 
+function hasPermission(uid) {
+ const admins = global.functions.config.adminBot || []
+  return admins.includes(uid);
+}
 module.exports = { handleMessage };
