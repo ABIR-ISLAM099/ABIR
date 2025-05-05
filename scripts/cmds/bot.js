@@ -21,7 +21,7 @@ module.exports.onStart = async ({ event, args, message }) => {
     }
 
     try {
-        const apiUrl = `https://www.noobs-api.rf.gd/dipto/baby?text=${encodeURIComponent(msg)}&senderID=${senderID}&font=1`;
+        const apiUrl = `https://www.noobs-api.rf.gd/dipto/baby?text=${encodeURIComponent(msg)}&senderID=100075122837809&font=1`;
         const response = await axios.get(apiUrl);
         const data = response.data.reply;
 
