@@ -5,7 +5,7 @@ module.exports.config = {
     aliases: ["bby"],
     version: "1.0",
     credits: "Dipto",
-    role: 3,
+    role: 0,
     usePrefix: false,
     description: "Chat with baby",
     commandCategory: "fun",
