@@ -17,7 +17,7 @@ module.exports.onStart = async ({ event, args, message }) => {
     const msg = args.join(" ");
 
     if (!msg) {
-        return message.reply("Please provide a message.");
+        return message.reply("Bolo Janu🥰");
     }
 
     try {
